@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (не нужна в образе)
+*.md
+!README.md
+docs/
+ARCHITECTURE.md
+QUICKSTART.md
+README_DOCKER.md
+
+# Данные (монтируются через volumes)
+output/
+data/
+checkpoints/
+cache/
+*.faiss
+input_files*/
+
+# Environment
+.env
+.env.*
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Other
+*.log
+.DS_Store
+uv.lock

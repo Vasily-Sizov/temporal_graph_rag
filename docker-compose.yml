@@ -1,0 +1,70 @@
+services:
+  temporal-graph-rag:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: temporal_graph_rag
+    volumes:
+      # Монтируем выходные данные (внутри проекта)
+      - ./output:/app/data/output
+      # Монтируем входные данные (из родительской директории test_rag_model)
+      - ../input_files:/app/data/input_files
+      # Монтируем .env (из корня проекта или родительской директории)
+      - ./.env:/app/.env:ro
+      # Монтируем код для разработки (hot reload)
+      - ./temporal_graph_rag:/app/temporal_graph_rag
+    environment:
+      - PYTHONUNBUFFERED=1
+      # IP адрес сервера с моделями (будет загружен из .env)
+      - IP=${IP}
+    network_mode: host  # Используем host network для доступа к локальным серверам LLM/Embedder
+    command: python --version
+    stdin_open: true
+    tty: true
+
+  # Сервис для построения индекса
+  build-index:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: temporal_graph_rag_builder
+    volumes:
+      - ./output:/app/data/output
+      - ../input_files:/app/data/input_files
+      - ./.env:/app/.env:ro
+      - ./temporal_graph_rag:/app/temporal_graph_rag
+    environment:
+      - PYTHONUNBUFFERED=1
+      - IP=${IP}
+    network_mode: host
+    command: >
+      python -m temporal_graph_rag.cli build
+      /app/data/output/parsing_and_chunks/chunks
+      /app/data/output/temporal_index
+      --community-window-size 20
+      --community-overlap 5
+    profiles:
+      - build  # Запускается только при явном указании профиля
+
+  # Сервис для поиска
+  search:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: temporal_graph_rag_search
+    volumes:
+      - ./output:/app/data/output
+      - ./.env:/app/.env:ro
+      - ./temporal_graph_rag:/app/temporal_graph_rag
+    environment:
+      - PYTHONUNBUFFERED=1
+      - IP=${IP}
+    network_mode: host
+    command: >
+      python -m temporal_graph_rag.cli search
+      /app/data/output/temporal_index
+      "Как изменился Гарри Поттер за серию?"
+      --books 1,7
+      --top-k 5
+    profiles:
+      - search  # Запускается только при явном указании профиля

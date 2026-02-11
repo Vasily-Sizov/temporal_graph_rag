@@ -1,0 +1,57 @@
+services:
+  llm-qwen32:
+    image: vllm/vllm-openai:v0.13.0
+    container_name: llm-qwen32
+    runtime: nvidia
+    ports:
+      - "8001:8000"
+    volumes:
+      - /mnt/llm-cache:/root/.cache/huggingface
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    command: >
+      Qwen/Qwen3-30B-A3B-Instruct-2507-FP8
+      --dtype auto
+      --host 0.0.0.0
+      --port 8000
+      --max-model-len 16384
+      --gpu-memory-utilization 0.8
+      --max-num-seqs 8
+
+  embed-ru:
+    image: vllm/vllm-openai:v0.13.0
+    container_name: embed-ru
+    runtime: nvidia
+    ports:
+      - "8006:8000"
+    volumes:
+      - /mnt/llm-cache:/root/.cache/huggingface
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    command: >
+      deepvk/USER-bge-m3
+      --dtype float16
+      --host 0.0.0.0
+      --port 8000
+      --max-model-len 512
+      --gpu-memory-utilization 0.10
+      --max-num-seqs 1
+
+  reranker-ru:
+    image: vllm/vllm-openai:v0.13.0
+    container_name: reranker-ru
+    runtime: nvidia
+    ports:
+      - "8010:8000"
+    volumes:
+      - /mnt/llm-cache:/root/.cache/huggingface
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    command: >
+      BAAI/bge-reranker-v2-m3
+      --dtype float16
+      --host 0.0.0.0
+      --port 8000
+      --max-model-len 1024
+      --gpu-memory-utilization 0.15
+      --max-num-seqs 1
